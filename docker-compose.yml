@@ -1,0 +1,91 @@
+version: "3.9"
+
+# ── PG AI Platform — Local Development Environment ─────────────────────────
+# Usage:
+#   docker compose up -d          # start everything
+#   docker compose up redis -d    # start only redis
+#   docker compose logs -f backend # tail logs
+
+services:
+
+  # ── Redis (Celery broker + cache) ──────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: pg-ai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ── FastAPI Backend ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: pg-ai-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app           # hot-reload: edits reflect immediately
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ── Celery Worker ──────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: pg-ai-worker
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: celery -A workers.celery_app worker --loglevel=info --concurrency=2
+
+  # ── LangFuse (optional — comment out to save RAM) ───────────────────────────
+  # langfuse:
+  #   image: langfuse/langfuse:latest
+  #   container_name: pg-ai-langfuse
+  #   ports:
+  #     - "3010:3000"
+  #   environment:
+  #     DATABASE_URL: postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+  #     NEXTAUTH_SECRET: change_me
+  #     NEXTAUTH_URL: http://localhost:3010
+  #     SALT: change_me_salt
+  #   depends_on:
+  #     - langfuse-db
+
+  # langfuse-db:
+  #   image: postgres:16-alpine
+  #   container_name: pg-ai-langfuse-db
+  #   environment:
+  #     POSTGRES_USER: langfuse
+  #     POSTGRES_PASSWORD: langfuse
+  #     POSTGRES_DB: langfuse
+  #   volumes:
+  #     - langfuse_db_data:/var/lib/postgresql/data
+
+volumes:
+  redis_data:
+  # langfuse_db_data:
