@@ -9,8 +9,8 @@ from typing import Optional
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from services.langfuse_client import get_trace_url, is_active, propagate_trace_context
 from services.llm_client import llm_complete
-from services.langfuse_client import trace
 
 router = APIRouter(prefix="/test", tags=["dev-test"])
 
@@ -18,6 +18,9 @@ router = APIRouter(prefix="/test", tags=["dev-test"])
 class LLMTestRequest(BaseModel):
     prompt: str
     model: Optional[str] = None
+    # Optional trace context — pass these to see grouped traces in LangFuse
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
 
 
 class LLMTestResponse(BaseModel):
@@ -26,16 +29,32 @@ class LLMTestResponse(BaseModel):
     tokens: dict
     cost_usd: float
     latency_ms: int
-    langfuse_trace_id: Optional[str] = None
+    trace_id: Optional[str] = None
+    trace_url: Optional[str] = None   # click to open in LangFuse dashboard
 
 
 @router.post("/llm", response_model=LLMTestResponse)
 async def test_llm(body: LLMTestRequest) -> LLMTestResponse:
-    """Send a prompt to the configured LLM and return the full response metadata."""
-    t = trace("test_llm", metadata={"prompt": body.prompt[:100]})
-    trace_id = getattr(t, "id", None) if t else None
+    """
+    Send a prompt to the LLM and return full metadata.
+    Pass user_id / session_id to see them in the LangFuse Traces UI.
+    """
+    with propagate_trace_context(
+        trace_name="test_llm",
+        user_id=body.user_id,
+        session_id=body.session_id,
+        tags=["dev", "test"],
+    ):
+        result = await llm_complete(
+            body.prompt,
+            model=body.model,
+            trace_name="test_llm",
+            user_id=body.user_id,
+            session_id=body.session_id,
+            tags=["dev", "test"],
+        )
 
-    result = await llm_complete(body.prompt, model=body.model)
+    trace_url = get_trace_url(result.trace_id) if result.trace_id and is_active() else None
 
     return LLMTestResponse(
         model=result.model_used,
@@ -47,5 +66,6 @@ async def test_llm(body: LLMTestRequest) -> LLMTestResponse:
         },
         cost_usd=result.cost_usd,
         latency_ms=result.latency_ms,
-        langfuse_trace_id=trace_id,
+        trace_id=result.trace_id,
+        trace_url=trace_url,
     )
