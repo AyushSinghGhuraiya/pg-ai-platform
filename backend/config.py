@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     # ── WhatsApp ──────────────────────────────────────────────────────────────
     whatsapp_access_token: str = Field(default="")
     whatsapp_phone_number_id: str = Field(default="")
+    whatsapp_waba_id: str = Field(default="")
     whatsapp_verify_token: str = Field(default="changeme")
     whatsapp_app_secret: str = Field(default="")
 
@@ -69,6 +70,8 @@ class Settings(BaseSettings):
     default_timezone: str = Field(default="Asia/Kolkata")
     working_hours_start: str = Field(default="09:00")
     working_hours_end: str = Field(default="21:00")
+    default_tenant_id: str = Field(default="")
+    test_whatsapp_number: str = Field(default="")
 
     # ── Computed helpers ──────────────────────────────────────────────────────
     @property

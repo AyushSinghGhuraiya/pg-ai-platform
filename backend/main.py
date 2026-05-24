@@ -59,6 +59,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from services.langfuse_client import init_langfuse
     init_langfuse()
 
+    # WhatsApp outbound service
+    from services.whatsapp import whatsapp_service
+    whatsapp_service.init()
+
     log.info("startup_complete", message="All services connected — PG AI Platform ready")
     print("\n" + "=" * 55)
     print("  PG AI Platform — Backend Started")
@@ -68,6 +72,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     print(f"  LLM      : {'✓' if settings.llm_configured else '✗ not configured'}")
     print(f"  LangFuse : {'✓' if settings.langfuse_configured else '✗ not configured'}")
     print(f"  Sentry   : {'✓' if settings.sentry_dsn else '✗ not configured'}")
+    print(f"  WhatsApp : {'✓' if settings.whatsapp_access_token else '✗ not configured'}")
     print("=" * 55 + "\n")
 
     yield  # ← application runs here
@@ -81,6 +86,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     from services.langfuse_client import flush_langfuse
     flush_langfuse()
+
+    from services.whatsapp import whatsapp_service
+    await whatsapp_service.close()
 
     log.info("shutdown_complete")
 
@@ -121,6 +129,10 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 # ── Routes ────────────────────────────────────────────────────────────────────
 from api.routes.health import router as health_router
 from api.routes.test import router as test_router
+from api.webhooks.whatsapp import router as whatsapp_webhook_router
+from api.routes.test_whatsapp import router as test_whatsapp_router
 
 app.include_router(health_router)
 app.include_router(test_router)
+app.include_router(whatsapp_webhook_router)
+app.include_router(test_whatsapp_router)
