@@ -82,3 +82,37 @@ def to_whatsapp_phone(e164: str) -> str:
 def validate_phone(phone: str) -> bool:
     """Return True if phone looks like a valid E.164 number."""
     return bool(re.match(r"^\+\d{7,15}$", phone))
+
+
+# ── Twilio webhook signature ───────────────────────────────────────────────────
+
+def verify_twilio_signature(
+    signature: Optional[str],
+    url: str,
+    params: dict,
+    auth_token: str,
+) -> bool:
+    """
+    Verify Twilio's X-Twilio-Signature header using Twilio's RequestValidator.
+    Returns False on any anomaly so callers can log + 403.
+    """
+    if not signature or not auth_token:
+        return False
+    try:
+        from twilio.request_validator import RequestValidator
+        return RequestValidator(auth_token).validate(url, params, signature)
+    except Exception:
+        return False
+
+
+# ── Twilio phone format helpers ────────────────────────────────────────────────
+
+def to_twilio_format(phone: str) -> str:
+    """Convert E.164 (+91XXXXXXXXXX) → Twilio WhatsApp format (whatsapp:+91XXXXXXXXXX)."""
+    e164 = phone if phone.startswith("+") else "+" + phone
+    return f"whatsapp:{e164}"
+
+
+def from_twilio_format(phone: str) -> str:
+    """Convert whatsapp:+91XXXXXXXXXX → E.164 (+91XXXXXXXXXX)."""
+    return phone.replace("whatsapp:", "")

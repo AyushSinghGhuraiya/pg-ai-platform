@@ -49,7 +49,15 @@ class Settings(BaseSettings):
     exotel_token: str = Field(default="")
     exotel_caller_did: str = Field(default="")
 
-    # ── WhatsApp ──────────────────────────────────────────────────────────────
+    # ── WhatsApp (provider selection) ────────────────────────────────────────
+    whatsapp_provider: str = Field(default="twilio")  # "twilio" or "meta"
+
+    # Twilio
+    twilio_account_sid: str = Field(default="")
+    twilio_auth_token: str = Field(default="")
+    twilio_whatsapp_number: str = Field(default="+14155238886")
+
+    # Meta
     whatsapp_access_token: str = Field(default="")
     whatsapp_phone_number_id: str = Field(default="")
     whatsapp_waba_id: str = Field(default="")
@@ -97,6 +105,16 @@ class Settings(BaseSettings):
     @property
     def langfuse_configured(self) -> bool:
         return bool(self.langfuse_public_key and self.langfuse_secret_key)
+
+    @property
+    def twilio_configured(self) -> bool:
+        return bool(self.twilio_account_sid and self.twilio_auth_token)
+
+    @property
+    def whatsapp_configured(self) -> bool:
+        if self.whatsapp_provider == "twilio":
+            return self.twilio_configured
+        return bool(self.whatsapp_access_token)
 
     @field_validator("supabase_url", mode="before")
     @classmethod

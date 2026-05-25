@@ -1,7 +1,8 @@
 """
 WhatsApp webhook processor.
 Orchestrates: parse → idempotency → lead upsert → DB save → mark-as-read.
-Always returns without raising — caller must return 200 to Meta regardless.
+Provider-agnostic: works with both Meta and Twilio ParsedMessage objects.
+Always returns without raising — caller must return 200/TwiML regardless.
 """
 
 from __future__ import annotations
@@ -13,7 +14,6 @@ from db.messages import (
     save_inbound_message,
     update_message_status,
 )
-from services.whatsapp import whatsapp_service
 from services.whatsapp_parser import ParsedMessage, StatusUpdate, whatsapp_parser
 from utils.logger import get_logger
 
@@ -86,9 +86,10 @@ async def process_message(msg: ParsedMessage) -> None:
             media_id=msg.media_id,
         )
 
-        # 4. Mark as read (best-effort — never let this block the pipeline)
+        # 4. Mark as read via adapter (best-effort)
         try:
-            await whatsapp_service.mark_as_read(msg.message_id)
+            from services.whatsapp_adapter import whatsapp_adapter
+            await whatsapp_adapter.mark_as_read(msg.message_id)
         except Exception as exc:
             log.warning("mark_as_read_failed", message_id=msg.message_id, error=str(exc))
 
