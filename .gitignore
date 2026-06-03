@@ -14,7 +14,7 @@ env/
 ENV/
 
 # ─── Environment / Secrets ────────────────────────────────────────────────────
-.env
+# .env included intentionally for this repo
 .env.local
 .env.*.local
 *.pem

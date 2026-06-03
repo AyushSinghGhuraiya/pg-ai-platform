@@ -15,7 +15,7 @@ log = get_logger(__name__)
 async def message_already_processed(message_id: str) -> bool:
     """Return True if this Meta message_id already exists in the DB (idempotency check)."""
     try:
-        client = await get_supabase()
+        client = get_supabase()
         result = (
             await client.table("messages")
             .select("id")
@@ -46,7 +46,7 @@ async def save_inbound_message(
     Returns the DB row id on success, None on failure.
     """
     try:
-        client = await get_supabase()
+        client = get_supabase()
         row = {
             "tenant_id": tenant_id,
             "lead_id": lead_id,
@@ -85,7 +85,7 @@ async def save_outbound_message(
 ) -> Optional[str]:
     """Persist an outbound WhatsApp message. Returns the DB row id."""
     try:
-        client = await get_supabase()
+        client = get_supabase()
         row = {
             "tenant_id": tenant_id,
             "lead_id": lead_id,
@@ -112,7 +112,7 @@ async def save_outbound_message(
 async def update_message_status(message_id: str, status: str) -> bool:
     """Update delivery status (sent → delivered → read) by whatsapp_message_id."""
     try:
-        client = await get_supabase()
+        client = get_supabase()
         await (
             client.table("messages")
             .update({"status": status})

@@ -1,0 +1,44 @@
+[92m01:06:09 - LiteLLM:WARNING[0m: common_utils.py:979 - litellm: could not pre-load bedrock-runtime response stream shape — Bedrock event-stream decoding will be unavailable. Error: No module named 'botocore'
+[92m01:06:09 - LiteLLM:WARNING[0m: common_utils.py:24 - litellm: could not pre-load sagemaker-runtime response stream shape — SageMaker event-stream decoding will be unavailable. Error: No module named 'botocore'
+INFO:     Started server process [31028]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "D:\PG AI\pg-ai-platform\backend\.venv\Lib\site-packages\starlette\routing.py", line 638, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\ayush\anaconda3\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\PG AI\pg-ai-platform\backend\.venv\Lib\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\ayush\anaconda3\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\PG AI\pg-ai-platform\backend\.venv\Lib\site-packages\fastapi\routing.py", line 216, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\ayush\anaconda3\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\PG AI\pg-ai-platform\backend\main.py", line 42, in lifespan
+    log.info("startup_begin", env=settings.app_env)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\PG AI\pg-ai-platform\backend\.venv\Lib\site-packages\structlog\_native.py", line 164, in meth
+    return self._proxy_to_logger(
+           ~~~~~~~~~~~~~~~~~~~~~^
+        name, _maybe_interpolate(event, args), **kw
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\PG AI\pg-ai-platform\backend\.venv\Lib\site-packages\structlog\_base.py", line 222, in _proxy_to_logger
+    args, kw = self._process_event(method_name, event, event_kw)
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\PG AI\pg-ai-platform\backend\.venv\Lib\site-packages\structlog\_base.py", line 173, in _process_event
+    event_dict = proc(self._logger, method_name, event_dict)
+  File "D:\PG AI\pg-ai-platform\backend\.venv\Lib\site-packages\structlog\stdlib.py", line 838, in add_logger_name
+    event_dict["logger"] = logger.name
+                           ^^^^^^^^^^^
+AttributeError: 'PrintLogger' object has no attribute 'name'
+
+ERROR:    Application startup failed. Exiting.

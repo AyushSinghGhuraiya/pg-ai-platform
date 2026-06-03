@@ -27,7 +27,7 @@ async def find_or_create_lead(
     """
     normalized = normalize_phone(phone)
     try:
-        client = await get_supabase()
+        client = get_supabase()
 
         # Check for existing lead
         result = (
@@ -81,7 +81,7 @@ async def get_lead_by_phone(tenant_id: str, phone: str) -> Optional[dict]:
     """Return the full lead row for a given phone, or None if not found."""
     normalized = normalize_phone(phone)
     try:
-        client = await get_supabase()
+        client = get_supabase()
         result = (
             await client.table("leads")
             .select("*")
@@ -104,7 +104,7 @@ async def get_recent_messages(
     """Return the N most recent messages for a lead, newest first."""
     normalized = normalize_phone(phone)
     try:
-        client = await get_supabase()
+        client = get_supabase()
 
         lead_result = (
             await client.table("leads")
