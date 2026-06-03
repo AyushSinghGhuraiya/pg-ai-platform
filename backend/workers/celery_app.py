@@ -6,8 +6,8 @@ from config import settings
 
 celery_app = Celery(
     "pg_ai",
-    broker=settings.effective_redis_url,
-    backend=settings.effective_redis_url,
+    broker=settings.redis_url,
+    backend=settings.redis_url,
     include=[
         "workers.tasks.call_retry",
         "workers.tasks.whatsapp_send",

@@ -67,12 +67,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     print("\n" + "=" * 55)
     print("  PG AI Platform — Backend Started")
     print(f"  Env      : {settings.app_env}")
-    print(f"  DB       : {'✓' if settings.db_configured else '✗ not configured'}")
-    print(f"  Redis    : {'✓' if settings.redis_configured else '✗ not configured'}")
-    print(f"  LLM      : {'✓' if settings.llm_configured else '✗ not configured'}")
-    print(f"  LangFuse : {'✓' if settings.langfuse_configured else '✗ not configured'}")
-    print(f"  Sentry   : {'✓' if settings.sentry_dsn else '✗ not configured'}")
-    print(f"  WhatsApp : {'✓' if settings.whatsapp_configured else '✗ not configured'} ({settings.whatsapp_provider})")
+    print(f"  DB       : {'[OK]' if settings.db_configured else '[--] not configured'}")
+    print(f"  Redis    : {'[OK]' if settings.redis_configured else '[--] not configured'}")
+    print(f"  LLM      : {'[OK]' if settings.llm_configured else '[--] not configured'}")
+    print(f"  LangFuse : {'[OK]' if settings.langfuse_configured else '[--] not configured'}")
+    print(f"  Sentry   : {'[OK]' if settings.sentry_dsn else '[--] not configured'}")
+    print(f"  WhatsApp : {'[OK]' if settings.whatsapp_configured else '[--] not configured'} ({settings.whatsapp_provider})")
     print("=" * 55 + "\n")
 
     yield  # ← application runs here
@@ -132,9 +132,15 @@ from api.routes.test import router as test_router
 from api.webhooks.whatsapp import router as whatsapp_webhook_router
 from api.webhooks.twilio import router as twilio_webhook_router
 from api.routes.test_whatsapp import router as test_whatsapp_router
+from api.webhooks.google_sheets import router as sheets_webhook_router
+from api.routes.test_sheets import router as test_sheets_router
+from api.routes.test_graph import router as test_graph_router
 
 app.include_router(health_router)
 app.include_router(test_router)
 app.include_router(whatsapp_webhook_router)
 app.include_router(twilio_webhook_router)
 app.include_router(test_whatsapp_router)
+app.include_router(sheets_webhook_router)
+app.include_router(test_sheets_router)
+app.include_router(test_graph_router)

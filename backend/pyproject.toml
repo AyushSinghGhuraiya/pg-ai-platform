@@ -25,6 +25,10 @@ dependencies = [
     "structlog>=24.4.0",
     "python-multipart>=0.0.12",
     "tenacity>=9.0.0",
+    "langgraph>=0.2.40",
+    "langgraph-checkpoint>=2.0.0",
+    "langchain-core>=0.3.0",
+    "twilio>=9.0.0",
 ]
 
 [project.optional-dependencies]
